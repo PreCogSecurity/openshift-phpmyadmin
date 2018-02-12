@@ -137,6 +137,9 @@ OpenShift phpMyAdmin MySQL
 
 ## Uninstall
 
+1. minishift oc-env
+2. eval $(minishift oc-env)
+
 ```bash
 oc delete all -l app=<NAME>-phpmyadmin
 oc delete all -l app=<NAME>-mysql
