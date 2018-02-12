@@ -141,7 +141,7 @@ OpenShift phpMyAdmin MySQL
 oc delete all -l app=<NAME>-phpmyadmin
 oc delete all -l app=<NAME>-mysql
 oc delete pvc -l app=<NAME>-mysql
-oc delete secret <NAME>-mysql
+oc delete secret -l app=<NAME>-mysql
 ```
 
 ## Run Docker Image As Root

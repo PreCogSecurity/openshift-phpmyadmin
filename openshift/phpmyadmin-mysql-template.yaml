@@ -63,16 +63,6 @@ objects:
               env:
                 - name: PMA_HOST
                   value: "${MYSQL_SERVICE_NAME}-mysql.${NAMESPACE}.svc"
-                - name: PMA_USER
-                  valueFrom:
-                    secretKeyRef:
-                      name: "${MYSQL_SERVICE_NAME}-mysql"
-                      key: "database-user"
-                - name: PMA_PASSWORD
-                  valueFrom:
-                    secretKeyRef:
-                      name: "${MYSQL_SERVICE_NAME}-mysql"
-                      key: "database-password"
               resources:
                 requests:
                   memory: "512Mi"
