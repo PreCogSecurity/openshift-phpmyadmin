@@ -82,7 +82,7 @@ docker-compose -f docker-compose.testing.yml up phpmyadmin
 
 ## Adding Custom Configuration
 
-You can add your own custom config.inc.php settings (such as Configuration Storage setup) 
+You can add your own custom config.inc.php settings (such as Configuration Storage setup)
 by creating a file named "config.user.inc.php" with the various user defined settings
 in it, and then linking it into the container using:
 
@@ -90,7 +90,7 @@ in it, and then linking it into the container using:
 -v /some/local/directory/config.user.inc.php:/etc/phpmyadmin/config.user.inc.php
 ```
 On the "docker run" line like this:
-``` 
+```
 docker run --name myadmin -d --link mysql_db_server:db -p 8080:80 -v /some/local/directory/config.user.inc.php:/etc/phpmyadmin/config.user.inc.php phpmyadmin/phpmyadmin
 ```
 
@@ -119,3 +119,37 @@ For more detailed documentation see https://docs.phpmyadmin.net/en/latest/setup.
 [hub]: https://hub.docker.com/r/phpmyadmin/phpmyadmin/
 
 Please report any issues with the Docker container to https://github.com/phpmyadmin/docker/issues
+
+# openshift-phpmyadmin-mysql
+
+OpenShift phpMyAdmin MySQL
+
+## Step1: Upload to OpenShift Docker Registry
+
+1. minishift start
+2. minishift docker-env
+3. eval $(minishift oc-env)
+4. oc login -u developer
+5. docker login -u developer -p $(oc whoami -t) $(minishift openshift registry) // docker login -u developer -p $(oc whoami -t) 172.30.1.1:5000
+6. docker pull phpmyadmin/phpmyadmin:latest
+7. docker tag phpmyadmin:latest $(minishift openshift registry)/<project>/phpmyadmin:latest // docker tag phpmyadmin:latest 172.30.1.1:5000/<project>/phpmyadmin:latest
+8. docker push $(minishift openshift registry)/<project>/phpmyadmin:latest // docker push 172.30.1.1:5000/<project>/phpmyadmin:latest
+
+## Uninstall
+
+```bash
+oc delete all -l app=<NAME>-phpmyadmin
+oc delete all -l app=<NAME>-mysql
+oc delete pvc -l app=<NAME>-mysql
+oc delete secret <NAME>-mysql
+```
+
+## Run Docker Image As Root
+
+```bash
+oc edit scc restricted
+```
+
+runAsUser.Type to RunAsAny.
+
+Ensure allowPrivilegedContainer is set to false.
