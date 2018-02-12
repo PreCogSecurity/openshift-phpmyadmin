@@ -8,7 +8,7 @@ metadata:
     openshift.io/provider-display-name: "Wen Hao."
     openshift.io/documentation-url: "https://docs.openshift.org/latest/using_images/db_images/mysql.html"
     openshift.io/support-url: "https://wenhao.github.io"
-    description: "MySQL database service, with persistent storage and phpMyAdmin. For more information about using this template."
+    description: "MySQL database service, with persistent storage and phpMyAdmin."
     tags: "mysql,phpmyadmin,database"
     iconClass: "icon-mysql-database"
 message: "The following service(s) have been created in your project: \n\n    phpMyAdmin: ${PHPMYADMIN_SERVICE_NAME}\n\n    MySQL: ${MYSQL_SERVICE_NAME}\n    Username: ${MYSQL_USER}\n    Password: ${MYSQL_PASSWORD}\n    Database Name: ${MYSQL_DATABASE}\n    Connection URL: mysql://${MYSQL_SERVICE_NAME}:3306/\n\nFor more information about using this template, see https://github.com/wenhao/openshift-phpmyadmin-mysql/blob/master/README.md."
