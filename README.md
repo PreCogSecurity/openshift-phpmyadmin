@@ -157,3 +157,19 @@ oc edit scc restricted
 runAsUser.Type to RunAsAny.
 
 Ensure allowPrivilegedContainer is set to false.
+
+## Troubleshooting
+
+1. Connect to OpenShift docker registry refused.
+
+```bash
+docker pull openshift/origin-docker-registry:v3.6.1
+
+oc status -v
+
+oc deploy docker-registry --retry
+
+oc logs -f dc/docker-registry
+
+oc describe svc/docker-registry
+```
