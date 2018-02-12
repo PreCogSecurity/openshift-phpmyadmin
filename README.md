@@ -130,10 +130,11 @@ OpenShift phpMyAdmin MySQL
 2. minishift docker-env
 3. eval $(minishift oc-env)
 4. oc login -u developer
-5. docker login -u developer -p $(oc whoami -t) $(minishift openshift registry) // docker login -u developer -p $(oc whoami -t) 172.30.1.1:5000
-6. docker pull phpmyadmin/phpmyadmin:latest
-7. docker tag phpmyadmin:latest $(minishift openshift registry)/<project>/phpmyadmin:latest // docker tag phpmyadmin:latest 172.30.1.1:5000/<project>/phpmyadmin:latest
-8. docker push $(minishift openshift registry)/<project>/phpmyadmin:latest // docker push 172.30.1.1:5000/<project>/phpmyadmin:latest
+5. oc expose service docker-registry -n default 
+6. docker login -u developer -p $(oc whoami -t) $(minishift openshift registry) // docker login -u developer -p $(oc whoami -t) 172.30.1.1:5000
+7. docker pull phpmyadmin/phpmyadmin:latest
+8. docker tag phpmyadmin:latest $(minishift openshift registry)/<project>/phpmyadmin:latest // docker tag phpmyadmin:latest 172.30.1.1:5000/<project>/phpmyadmin:latest
+9. docker push $(minishift openshift registry)/<project>/phpmyadmin:latest // docker push 172.30.1.1:5000/<project>/phpmyadmin:latest
 
 ## Uninstall
 
