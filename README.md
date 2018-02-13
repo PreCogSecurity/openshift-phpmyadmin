@@ -124,6 +124,10 @@ Please report any issues with the Docker container to https://github.com/phpmyad
 
 OpenShift phpMyAdmin MySQL
 
+## Docker registry mirrors
+
+1. http://hub-mirror.c.163.com
+
 ## Step1: Upload to OpenShift Docker Registry
 
 1. minishift start
