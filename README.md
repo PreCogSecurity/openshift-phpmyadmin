@@ -80,6 +80,28 @@ Using the docker-compose.testing.yml from https://github.com/phpmyadmin/docker
 docker-compose -f docker-compose.testing.yml up phpmyadmin
 ```
 
+## Running the test suite
+
+The test suite is split into two layers.
+
+Unit tests that need no Docker or network access:
+
+```
+php testing/test_config.php            # config.inc.php environment parsing
+sh testing/test_run.sh                 # run.sh secret generation and idempotency
+python testing/validate_world_sql.py   # world.sql fixture shape
+```
+
+End-to-end test that needs Docker and docker-compose only:
+
+```
+make test
+```
+
+`make test` builds the image, starts a MariaDB server and phpMyAdmin via
+`docker-compose.test.yml`, runs `testing/phpmyadmin_test.py` against them, and
+tears the stack down afterwards. See CONTRIBUTING.md for details.
+
 ## Adding Custom Configuration
 
 You can add your own custom config.inc.php settings (such as Configuration Storage setup)
@@ -98,11 +120,14 @@ See the following links for config file information.
 https://docs.phpmyadmin.net/en/latest/config.html#config
 https://docs.phpmyadmin.net/en/latest/setup.html
 
-## Usage behind reverse proxys
+## Usage behind reverse proxies
 
 Set the variable ``PMA_ABSOLUTE_URI`` to the fully-qualified path (``https://pma.example.net/``) where the reverse proxy makes phpMyAdmin available.
 
 ## Environment variables summary
+
+A ready-to-copy list of all variables with placeholder values is available in
+`.env.example` at the repository root.
 
 * ``PMA_ARBITRARY`` - when set to 1 connection to the arbitrary server will be allowed
 * ``PMA_HOST`` - define address/host name of the MySQL server

@@ -4,11 +4,10 @@ NAME="$1"
 
 if [ -n "$2" ] ; then
     PORT="$2"
-    TESTSUITE_PORT=$2
 fi
 
 if [ -n "$3" ] ; then
-    SERVER="--server $3"
+    SERVER="$3"
     PMA_HOST=$3
 else
     SERVER=''
@@ -16,7 +15,6 @@ fi
 
 # Set PHPMyAdmin environment
 PHPMYADMIN_HOSTNAME=${TESTSUITE_HOSTNAME:=localhost}
-PHPMYADMIN_PORT=${TESTSUITE_PORT:=80}
 PHPMYADMIN_URL=http://$PHPMYADMIN_HOSTNAME:$PORT/
 
 # Color text output
@@ -36,7 +34,7 @@ if [ -f /.dockerenv ] ; then
 
     # Wait for database to start
     TIMEOUT=0
-    while ! curl "$PHPMYADMIN_DB_URL" &>/dev/null; do
+    while ! curl "$PHPMYADMIN_DB_URL" >/dev/null 2>&1; do
         echo "Waiting for ${PHPMYADMIN_DB_HOSTNAME} database start..."
         sleep 10
         TIMEOUT=$((TIMEOUT + 1))
@@ -53,9 +51,20 @@ else
     COMMAND_HOST="docker exec ${NAME}"
 fi
 
-# Wait for container to start
+# Run a command inside the phpMyAdmin container when running outside it, or
+# directly on the host when running inside the container.
+container_cmd() {
+    if [ -n "$COMMAND_HOST" ] ; then
+        # shellcheck disable=SC2086 # COMMAND_HOST is intentionally word-split
+        $COMMAND_HOST "$@"
+    else
+        "$@"
+    fi
+}
+
+# Wait for container to start
 TIMEOUT=0
-while ! $COMMAND_HOST ps aux | grep -q nginx ; do
+while ! container_cmd ps aux | grep -q nginx ; do
     echo "Waiting for PHPMyAdmin start..."
     sleep 1
     TIMEOUT=$((TIMEOUT + 1))
@@ -67,6 +76,19 @@ while ! $COMMAND_HOST ps aux | grep -q nginx ; do
     fi
 done
 
+# Validate the SQL fixture before importing it
+if [ -f ./validate_world_sql.py ] ; then
+    VALIDATE=./validate_world_sql.py
+else
+    VALIDATE=./testing/validate_world_sql.py
+fi
+python "$VALIDATE"
+ret=$?
+if [ $ret -ne 0 ] ; then
+    echo "Result of ${PHPMYADMIN_DB_HOSTNAME} tests: ${RED}FAILED${NC}"
+    exit $ret
+fi
+
 # Perform tests
 if [ $ret -eq 0 ] ; then
     if [ -f ./phpmyadmin_test.py ] ; then
@@ -74,17 +96,21 @@ if [ $ret -eq 0 ] ; then
     else
         FILENAME=./testing/phpmyadmin_test.py
     fi
-    python $FILENAME --url "$PHPMYADMIN_URL" --username root --password $TESTSUITE_PASSWORD $SERVER
+    if [ -n "$SERVER" ] ; then
+        python "$FILENAME" --url "$PHPMYADMIN_URL" --username root --password "$TESTSUITE_PASSWORD" --server "$SERVER"
+    else
+        python "$FILENAME" --url "$PHPMYADMIN_URL" --username root --password "$TESTSUITE_PASSWORD"
+    fi
     ret=$?
 fi
 
 # Show debug output in case of failure
 if [ $ret -ne 0 ] ; then
     curl "$PHPMYADMIN_URL"
-    $COMMAND_HOST ps faux
-    $COMMAND_HOST cat /var/log/php-fpm.log
-    $COMMAND_HOST cat /var/log/nginx-error.log
-    $COMMAND_HOST cat /var/log/supervisord.log
+    container_cmd ps faux
+    container_cmd cat /var/log/php-fpm.log
+    container_cmd cat /var/log/nginx-error.log
+    container_cmd cat /var/log/supervisord.log
     echo "Result of ${PHPMYADMIN_DB_HOSTNAME} tests: ${RED}FAILED${NC}"
     exit $ret
 fi
