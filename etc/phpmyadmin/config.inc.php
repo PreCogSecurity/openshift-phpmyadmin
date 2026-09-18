@@ -1,6 +1,14 @@
 <?php
 
-require('/etc/phpmyadmin/config.secret.inc.php');
+/* Directory holding the phpMyAdmin configuration files. Overridable so the
+ * configuration can be unit-tested outside the container (see
+ * testing/test_config.php); defaults to the in-container location. */
+$configDir = getenv('PMA_CONFIG_DIR');
+if ($configDir === false || $configDir === '') {
+    $configDir = '/etc/phpmyadmin';
+}
+
+require($configDir . '/config.secret.inc.php');
 
 /* Ensure we got the environment */
 $vars = array(
@@ -40,12 +48,12 @@ $hosts = array('db');
 /* Set by environment */
 if (!empty($_ENV['PMA_HOST'])) {
     $hosts = array($_ENV['PMA_HOST']);
-    $verbose = array($_ENV['PMA_VERBOSE']);
-    $ports = array($_ENV['PMA_PORT']);
+    $verbose = isset($_ENV['PMA_VERBOSE']) ? array($_ENV['PMA_VERBOSE']) : array();
+    $ports = isset($_ENV['PMA_PORT']) ? array($_ENV['PMA_PORT']) : array();
 } elseif (!empty($_ENV['PMA_HOSTS'])) {
     $hosts = explode(',', $_ENV['PMA_HOSTS']);
-    $verbose = explode(',', $_ENV['PMA_VERBOSES']);
-    $ports = explode(',', $_ENV['PMA_PORTS']);
+    $verbose = isset($_ENV['PMA_VERBOSES']) ? explode(',', $_ENV['PMA_VERBOSES']) : array();
+    $ports = isset($_ENV['PMA_PORTS']) ? explode(',', $_ENV['PMA_PORTS']) : array();
 }
 
 /* Server settings */
@@ -78,6 +86,6 @@ $cfg['UploadDir'] = '';
 $cfg['SaveDir'] = '';
 
 /* Include User Defined Settings Hook */
-if (file_exists('/etc/phpmyadmin/config.user.inc.php')) {
-    include('/etc/phpmyadmin/config.user.inc.php');
+if (file_exists($configDir . '/config.user.inc.php')) {
+    include($configDir . '/config.user.inc.php');
 }

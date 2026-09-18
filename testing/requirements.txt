@@ -1,0 +1,7 @@
+# Python dependencies for the phpMyAdmin E2E test suite.
+# Pinned for reproducible installs; compatible with Python 2.7 (Travis CI and
+# the alpine-based testing image) and Python 3.
+mechanize==0.4.5
+html5lib==1.0.1
+six==1.12.0
+webencodings==0.5.1
